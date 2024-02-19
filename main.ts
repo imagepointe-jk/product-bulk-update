@@ -7,17 +7,26 @@ import dotenv from "dotenv";
 const importSheetName = "WC Bulk Product Import";
 dotenv.config();
 
+type UpdateResult = {
+  sku: string;
+  success: boolean;
+  message: string;
+};
+
 async function run() {
-  const data = getSourceJson(`./${importSheetName}.xlsx`)["Sheet1"];
-  const results: { sku: string; success: boolean; message: string }[] = [];
-  for (let i = 0; i < data.length; i++) {
-    const row = data[i];
-    const completePercent = Math.round((i / data.length) * 100);
+  const asiRows = getSourceJson(`./${importSheetName}.xlsx`)["asi"];
+  const garmentRows = getSourceJson(`./${importSheetName}.xlsx`)["garment"];
+  const allRows = asiRows.concat(garmentRows);
+  const results: UpdateResult[] = [];
+
+  for (let i = 0; i < allRows.length; i++) {
+    const item = allRows[i];
+    const completePercent = Math.round((i / allRows.length) * 100);
     console.log(
-      `${completePercent}% complete...Preparing to update product SKU ${row.sku}.`
+      `${completePercent}% complete...Preparing to update product SKU ${item.sku}.`
     );
     try {
-      const parsed = parseProductData(row);
+      const parsed = parseProductData(item);
       const { valuesSynced, expectedValuesSynced } = await updateProduct(
         parsed
       );
@@ -27,15 +36,15 @@ async function run() {
         );
       }
       results.push({
-        sku: row.sku,
+        sku: item.sku,
         success: true,
         message: `${valuesSynced} of ${expectedValuesSynced} values synced.`,
       });
     } catch (error) {
-      console.error(`Failed to update product ${row.sku}.`, error);
+      console.error(`Failed to update product ${item.sku}.`, error);
       const message = error instanceof ZodError ? "Parse error." : error;
       results.push({
-        sku: row.sku,
+        sku: item.sku,
         success: false,
         message: `${message}`,
       });

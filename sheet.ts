@@ -1,7 +1,7 @@
 import fs from "fs";
 import xlsx, { WorkBook } from "xlsx";
 
-type Obj = {
+export type Obj = {
   [key: string]: any;
 };
 

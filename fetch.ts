@@ -1,3 +1,4 @@
+import { spellNumber } from "./utility";
 import { ProductData, verifyProductChanges } from "./validation";
 
 export async function updateProduct(productData: ProductData) {
@@ -70,6 +71,18 @@ export async function updateProduct(productData: ProductData) {
       id: 2378726,
       key: "promo_quantity_5",
       value: productData.quantity5 ? `${productData.quantity5}` : undefined,
+    },
+    {
+      id: 2378766,
+      key: "base_price",
+      value: productData.netCost ? `${productData.netCost}` : undefined,
+    },
+    {
+      id: 2378768,
+      key: "markup_schedule",
+      value: productData.pricingSchedule
+        ? spellNumber(productData.pricingSchedule)
+        : undefined,
     },
   ].filter((item) => item.value !== undefined);
 

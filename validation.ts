@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { spellNumber } from "./utility";
 
 const productSchema = z.object({
   sku: z.string(),
@@ -12,6 +13,8 @@ const productSchema = z.object({
   price3: z.number().optional(),
   price4: z.number().optional(),
   price5: z.number().optional(),
+  netCost: z.number().optional(),
+  pricingSchedule: z.number().optional(),
 });
 
 export function parseProductData(product: any) {
@@ -39,11 +42,15 @@ export function verifyProductChanges(
     price3: findMetaDataValue("promo_price_3", responseMetaData),
     price4: findMetaDataValue("promo_price_4", responseMetaData),
     price5: findMetaDataValue("promo_price_5", responseMetaData),
+    netCost: findMetaDataValue("base_price", responseMetaData),
+    pricingSchedule: findMetaDataValue("markup_schedule", responseMetaData),
   };
 
   const valuesSynced = Object.entries(productChangeData).reduce(
     (accum, [key, value]) => {
-      if (`${value}` === `${newProductData[key]}`) return accum + 1;
+      const valueToCompare =
+        key === "pricingSchedule" ? spellNumber(+value) : value;
+      if (`${valueToCompare}` === `${newProductData[key]}`) return accum + 1;
       return accum;
     },
     0
